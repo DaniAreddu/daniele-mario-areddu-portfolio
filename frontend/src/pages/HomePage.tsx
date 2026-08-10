@@ -1,4 +1,5 @@
 import { ArrowUpRight } from "lucide-react";
+import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
@@ -11,12 +12,16 @@ import {
   useCommunity,
   useEvents,
   useEventStats,
+  useHomepage,
   useJourney,
   useProfile,
-  useProjects,
-  useTalks,
 } from "@/hooks/usePortfolioQueries";
 import { useSeo } from "@/hooks/useSeo";
+
+// Applied only if the CMS homepage settings haven't set an order yet (a
+// brand-new, never-configured singleton) — the admin-configured
+// `section_order` is otherwise always authoritative.
+const DEFAULT_SECTION_ORDER = ["about", "journey", "speaking", "projects", "community"];
 
 export default function HomePage() {
   const { t } = useTranslation();
@@ -24,8 +29,7 @@ export default function HomePage() {
   const profile = useProfile();
   const biography = useBiography();
   const journey = useJourney();
-  const projects = useProjects();
-  const talks = useTalks();
+  const homepage = useHomepage();
   const community = useCommunity();
   const eventStats = useEventStats();
   const events = useEvents();
@@ -35,7 +39,7 @@ export default function HomePage() {
     description:
       "Portfolio of Daniele Mario Areddu, Backend & AI Developer, international technology speaker, Computer Science student, and Founder of Velletri.dev.",
     path: "/",
-    ready: profile.isSuccess || profile.isError,
+    ready: (profile.isSuccess && homepage.isSuccess) || profile.isError || homepage.isError,
     jsonLd: profile.data
       ? {
           "@context": "https://schema.org",
@@ -49,13 +53,26 @@ export default function HomePage() {
       : undefined,
   });
 
-  if (profile.isLoading) return <LoadingState />;
-  if (profile.isError || !profile.data) return <ErrorState onRetry={() => profile.refetch()} />;
+  if (profile.isLoading || homepage.isLoading) return <LoadingState />;
+  if (profile.isError || homepage.isError || !profile.data || !homepage.data) {
+    return (
+      <ErrorState
+        onRetry={() => {
+          void profile.refetch();
+          void homepage.refetch();
+        }}
+      />
+    );
+  }
 
   const data = profile.data;
-  const featuredProjects = projects.data?.filter((p) => p.is_featured).slice(0, 2) ?? [];
-  const featuredTalks = talks.data?.filter((tk) => tk.is_featured).slice(0, 3) ?? [];
+  const hero = homepage.data;
+  const featuredProjects = hero.features.filter((feature) => feature.entity_type === "project");
+  const featuredEvents = hero.features.filter((feature) => feature.entity_type === "event");
   const journeyPreview = journey.data?.slice(0, 4) ?? [];
+  const sectionOrder =
+    hero.section_order.length > 0 ? hero.section_order : DEFAULT_SECTION_ORDER;
+  const isSectionVisible = (key: string) => hero.section_visibility[key] !== false;
 
   const sortedEvents = [...(events.data ?? [])].sort(
     (a, b) => a.year - b.year || (a.month ?? 99) - (b.month ?? 99),
@@ -75,63 +92,8 @@ export default function HomePage() {
     ),
   ].filter((city): city is string => Boolean(city));
 
-  return (
-    <>
-      {/* Hero */}
-      <section className="container-editorial grid grid-cols-1 gap-12 py-16 sm:py-24 lg:grid-cols-[1.2fr_0.8fr] lg:gap-16">
-        <div className="animate-fade-up">
-          <p className="eyebrow">{data.brand_label}</p>
-          <h1 className="mt-5 text-balance font-serif text-4xl leading-[1.05] tracking-tightest text-ink sm:text-6xl lg:text-7xl">
-            Building intelligent systems.
-            <br /> Sharing what I learn around the world.
-          </h1>
-          <p className="mt-6 max-w-xl text-lg text-ink-soft">{data.positioning_statement}</p>
-
-          <dl className="mt-6 flex flex-wrap gap-x-6 gap-y-2 font-mono text-xs uppercase tracking-wide text-ink-faint">
-            <div className="flex items-center gap-1.5">
-              <dt className="sr-only">Base</dt>
-              <dd>{t("home.basedIn")}</dd>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <dt className="sr-only">Availability</dt>
-              <dd>{t("home.availableFor")}</dd>
-            </div>
-          </dl>
-
-          <div className="mt-10 flex flex-wrap gap-3">
-            <Link to={localizedPath("/projects")} className="btn-primary">
-              {t("common.exploreWork")} <ArrowUpRight size={16} aria-hidden="true" />
-            </Link>
-            <Link to={localizedPath("/contact")} className="btn-secondary">
-              {t("common.inviteToSpeak")}
-            </Link>
-          </div>
-
-          <ul className="mt-14 grid max-w-xl grid-cols-3 gap-6 border-t border-ink/10 pt-6">
-            <li>
-              <p className="font-serif text-2xl text-ink">{data.talks_count_label}</p>
-              <p className="mt-1 text-xs text-ink-faint">{t("home.credibilityTalks")}</p>
-            </li>
-            <li>
-              <p className="font-serif text-2xl text-ink">{data.speaking_years_label}</p>
-              <p className="mt-1 text-xs text-ink-faint">{t("home.credibilityYears")}</p>
-            </li>
-            <li>
-              <p className="font-serif text-sm leading-tight text-ink">
-                {data.speaking_regions_label}
-              </p>
-              <p className="mt-1 text-xs text-ink-faint">{t("home.credibilityRegions")}</p>
-            </li>
-          </ul>
-        </div>
-
-        <div className="relative flex flex-col gap-4">
-          <Monogram />
-          <RouteMotif className="h-28 w-full text-ink-faint" />
-        </div>
-      </section>
-
-      {/* About preview */}
+  const optionalSections: Record<string, JSX.Element | null> = {
+    about: (
       <section className="border-t border-ink/10 bg-paper-warm py-20">
         <div className="container-editorial grid grid-cols-1 gap-10 lg:grid-cols-[0.4fr_0.6fr]">
           <p className="eyebrow">{t("home.sectionAbout")}</p>
@@ -152,9 +114,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Journey preview */}
-      {journeyPreview.length > 0 ? (
+    ),
+    journey:
+      journeyPreview.length > 0 ? (
         <section className="py-20">
           <div className="container-editorial">
             <div className="flex items-baseline justify-between">
@@ -179,10 +141,9 @@ export default function HomePage() {
             </ol>
           </div>
         </section>
-      ) : null}
-
-      {/* Speaking preview */}
-      {featuredTalks.length > 0 || eventStats.data ? (
+      ) : null,
+    speaking:
+      featuredEvents.length > 0 || eventStats.data ? (
         <section className="border-t border-ink/10 bg-ink py-20 text-paper">
           <div className="container-editorial">
             <div className="flex flex-wrap items-baseline justify-between gap-4">
@@ -220,15 +181,18 @@ export default function HomePage() {
               </div>
             ) : null}
 
-            {featuredTalks.length > 0 ? (
+            {featuredEvents.length > 0 ? (
               <ul className="mt-10 grid grid-cols-1 gap-8 border-t border-paper/15 pt-8 lg:grid-cols-3">
-                {featuredTalks.map((talk) => (
-                  <li key={talk.slug} className="border-t border-paper/15 pt-4">
-                    <p className="font-serif text-xl leading-snug">{talk.title}</p>
-                    {talk.topics.length > 0 ? (
-                      <p className="mt-2 text-xs uppercase tracking-wide text-paper/50">
-                        {talk.topics.join(" · ")}
-                      </p>
+                {featuredEvents.map((feature) => (
+                  <li key={feature.url_path} className="border-t border-paper/15 pt-4">
+                    <Link
+                      to={localizedPath(feature.url_path)}
+                      className="font-serif text-xl leading-snug hover:underline"
+                    >
+                      {feature.title}
+                    </Link>
+                    {feature.summary ? (
+                      <p className="mt-2 text-sm text-paper/70">{feature.summary}</p>
                     ) : null}
                   </li>
                 ))}
@@ -236,10 +200,9 @@ export default function HomePage() {
             ) : null}
           </div>
         </section>
-      ) : null}
-
-      {/* Projects preview */}
-      {featuredProjects.length > 0 ? (
+      ) : null,
+    projects:
+      featuredProjects.length > 0 ? (
         <section className="py-20">
           <div className="container-editorial">
             <div className="flex items-baseline justify-between">
@@ -252,16 +215,16 @@ export default function HomePage() {
               </Link>
             </div>
             <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-2">
-              {featuredProjects.map((project) => (
+              {featuredProjects.map((feature) => (
                 <Link
-                  key={project.slug}
-                  to={localizedPath(`/projects/${project.slug}`)}
+                  key={feature.url_path}
+                  to={localizedPath(feature.url_path)}
                   className="group border-t border-ink/15 pt-5"
                 >
                   <p className="font-serif text-2xl text-ink group-hover:text-cobalt">
-                    {project.title}
+                    {feature.title}
                   </p>
-                  <p className="mt-3 text-ink-soft">{project.summary}</p>
+                  <p className="mt-3 text-ink-soft">{feature.summary}</p>
                   <p className="mt-4 text-sm font-medium text-ink underline decoration-ink/30 underline-offset-4">
                     {t("common.viewProject")}
                   </p>
@@ -270,26 +233,88 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-      ) : null}
-
-      {/* Community preview */}
-      {community.data ? (
-        <section className="border-t border-ink/10 bg-paper-warm py-20">
-          <div className="container-editorial grid grid-cols-1 gap-10 lg:grid-cols-[0.4fr_0.6fr]">
-            <p className="eyebrow">{t("home.sectionCommunity")}</p>
-            <div>
-              <p className="font-serif text-2xl text-ink sm:text-3xl">{community.data.name}</p>
-              <p className="mt-3 max-w-2xl text-ink-soft">{community.data.mission}</p>
-              <Link
-                to={localizedPath("/community")}
-                className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-ink underline decoration-ink/30 underline-offset-4 hover:decoration-ink"
-              >
-                {t("common.readMore")} <ArrowUpRight size={14} aria-hidden="true" />
-              </Link>
-            </div>
+      ) : null,
+    community: community.data ? (
+      <section className="border-t border-ink/10 bg-paper-warm py-20">
+        <div className="container-editorial grid grid-cols-1 gap-10 lg:grid-cols-[0.4fr_0.6fr]">
+          <p className="eyebrow">{t("home.sectionCommunity")}</p>
+          <div>
+            <p className="font-serif text-2xl text-ink sm:text-3xl">{community.data.name}</p>
+            <p className="mt-3 max-w-2xl text-ink-soft">{community.data.mission}</p>
+            <Link
+              to={localizedPath("/community")}
+              className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-ink underline decoration-ink/30 underline-offset-4 hover:decoration-ink"
+            >
+              {t("common.readMore")} <ArrowUpRight size={14} aria-hidden="true" />
+            </Link>
           </div>
-        </section>
-      ) : null}
+        </div>
+      </section>
+    ) : null,
+  };
+
+  return (
+    <>
+      {/* Hero */}
+      <section className="container-editorial grid grid-cols-1 gap-12 py-16 sm:py-24 lg:grid-cols-[1.2fr_0.8fr] lg:gap-16">
+        <div className="animate-fade-up">
+          <p className="eyebrow">{hero.hero_eyebrow}</p>
+          <h1 className="mt-5 whitespace-pre-line text-balance font-serif text-4xl leading-[1.05] tracking-tightest text-ink sm:text-6xl lg:text-7xl">
+            {hero.hero_headline}
+          </h1>
+          <p className="mt-6 max-w-xl text-lg text-ink-soft">{hero.hero_subheadline}</p>
+
+          <dl className="mt-6 flex flex-wrap gap-x-6 gap-y-2 font-mono text-xs uppercase tracking-wide text-ink-faint">
+            <div className="flex items-center gap-1.5">
+              <dt className="sr-only">Base</dt>
+              <dd>{t("home.basedIn")}</dd>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <dt className="sr-only">Availability</dt>
+              <dd>{t("home.availableFor")}</dd>
+            </div>
+          </dl>
+
+          <div className="mt-10 flex flex-wrap gap-3">
+            {hero.primary_cta_label && hero.primary_cta_url ? (
+              <Link to={localizedPath(hero.primary_cta_url)} className="btn-primary">
+                {hero.primary_cta_label} <ArrowUpRight size={16} aria-hidden="true" />
+              </Link>
+            ) : null}
+            {hero.secondary_cta_label && hero.secondary_cta_url ? (
+              <Link to={localizedPath(hero.secondary_cta_url)} className="btn-secondary">
+                {hero.secondary_cta_label}
+              </Link>
+            ) : null}
+          </div>
+
+          <ul className="mt-14 grid max-w-xl grid-cols-3 gap-6 border-t border-ink/10 pt-6">
+            <li>
+              <p className="font-serif text-2xl text-ink">{data.talks_count_label}</p>
+              <p className="mt-1 text-xs text-ink-faint">{t("home.credibilityTalks")}</p>
+            </li>
+            <li>
+              <p className="font-serif text-2xl text-ink">{data.speaking_years_label}</p>
+              <p className="mt-1 text-xs text-ink-faint">{t("home.credibilityYears")}</p>
+            </li>
+            <li>
+              <p className="font-serif text-sm leading-tight text-ink">
+                {data.speaking_regions_label}
+              </p>
+              <p className="mt-1 text-xs text-ink-faint">{t("home.credibilityRegions")}</p>
+            </li>
+          </ul>
+        </div>
+
+        <div className="relative flex flex-col gap-4">
+          <Monogram />
+          <RouteMotif className="h-28 w-full text-ink-faint" />
+        </div>
+      </section>
+
+      {sectionOrder.map((key) => (
+        <Fragment key={key}>{isSectionVisible(key) ? optionalSections[key] : null}</Fragment>
+      ))}
 
       {/* Contact CTA */}
       <section className="py-24">

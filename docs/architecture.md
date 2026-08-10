@@ -41,12 +41,14 @@ flowchart LR
   a single responsibility, which is what the automated tests target independently
   (repository tests, service-level assertions via the API, and full integration
   tests).
-- **Private `/admin` webmaster area.** A CMS is being built out incrementally on top
-  of this same backend/frontend (no separate service) — see
-  [admin-guide.md](admin-guide.md) once it lands. `backend/app/seed/data.py` remains
-  the origin of the initial content and stays useful for bulk/scripted changes and
-  fresh-environment seeding; day-to-day edits move to `/admin` as each content
-  module ships.
+- **Private `/admin` webmaster area.** A full CMS built on top of this same
+  backend/frontend (no separate service) — every content type, the media library,
+  and site administration (navigation, SEO, redirects, settings, homepage) are
+  managed there; see [admin-guide.md](admin-guide.md) for the complete feature
+  list. `backend/app/seed/data.py` remains the origin of the initial content and
+  stays useful for bulk/scripted changes and fresh-environment seeding, but
+  day-to-day edits happen in `/admin` — routine content changes no longer require
+  touching source code.
 
 ## Request flow: a page load
 
@@ -80,9 +82,10 @@ rate limiting, and email delivery behavior.
    login/2FA-verification endpoints specifically.
 3. The backend enforces auth via `get_current_admin_user` in `app/api/deps.py`, then
    the same router → service → repository layering as the public API.
-4. Administrative actions are recorded to an `AuditEvent` log; content changes (from
-   the Speaking module onward) also snapshot a `Revision` before applying, so
-   mistakes are recoverable. See [admin-guide.md](admin-guide.md).
+4. Administrative actions are recorded to an `AuditEvent` log, browsable at
+   `/admin/audit-log`; lifecycle-enabled content changes also snapshot a
+   `Revision` before applying, so mistakes are recoverable. See
+   [admin-guide.md](admin-guide.md).
 
 ## Deliberately excluded
 

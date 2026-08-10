@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from datetime import date
 
-from sqlalchemy import Date, Integer, String, Text
+from sqlalchemy import Boolean, Date, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.db.base import Base, TimestampMixin
+from app.db.base import Base, PublishableMixin, SoftDeleteMixin, TimestampMixin
 
 
 class CommunityProfile(Base, TimestampMixin):
@@ -29,7 +29,7 @@ class CommunityProfile(Base, TimestampMixin):
     website_url: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
 
-class CommunityActivity(Base, TimestampMixin):
+class CommunityActivity(TimestampMixin, PublishableMixin, SoftDeleteMixin, Base):
     __tablename__ = "community_activity"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -41,4 +41,7 @@ class CommunityActivity(Base, TimestampMixin):
     activity_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     activity_type: Mapped[str] = mapped_column(String(40), nullable=False, default="meetup")
     url: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    logo_media_url: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    is_featured: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
+    internal_notes: Mapped[str | None] = mapped_column(Text, nullable=True)

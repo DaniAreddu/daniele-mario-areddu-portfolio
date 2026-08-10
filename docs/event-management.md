@@ -1,12 +1,17 @@
 # Event management guide
 
-All speaking events live in `backend/app/seed/data.py` as plain Python data — there is
-no admin panel (see [architecture.md](architecture.md) for why). This keeps every fact
-in one reviewable, version-controlled place. As of this writing the dataset covers 32
-appearances from 2023 to 2026 across 10 countries and 3 continents (Europe, North
-America, Central Asia) — see `GET /api/v1/events/stats` for the live, computed figures.
+Speaking events are now primarily managed through the admin UI at
+`/admin/speaking` (see [admin-guide.md](admin-guide.md)) — draft, preview,
+publish, schedule, and revision history are all handled there without touching
+source code. `backend/app/seed/data.py` remains the origin of the initial
+dataset and is still the right tool for bulk/scripted changes or re-seeding a
+fresh environment; this document describes the conventions that apply either
+way (the admin UI enforces the same field constraints). As of this writing the
+seeded dataset covers 32 appearances from 2023 to 2026 across 10 countries and 3
+continents (Europe, North America, Central Asia) — see `GET /api/v1/events/stats`
+for the live, computed figures.
 
-## Adding a new event
+## Adding a new event via the seed file
 
 1. Open `backend/app/seed/data.py` and find the `EVENTS` list.
 2. Add a new entry using the `_event(...)` helper:

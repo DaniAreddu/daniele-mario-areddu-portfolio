@@ -3,9 +3,10 @@ from __future__ import annotations
 from typing import Any
 
 from sqlalchemy import JSON, ForeignKey, Integer, String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
+from app.models.admin_user import AdminUser
 
 
 class AuditEvent(TimestampMixin, Base):
@@ -28,3 +29,5 @@ class AuditEvent(TimestampMixin, Base):
     entity_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     summary: Mapped[str] = mapped_column(Text, default="")
     context: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+
+    actor: Mapped[AdminUser | None] = relationship()

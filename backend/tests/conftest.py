@@ -10,16 +10,19 @@ variables below must be set before ``app.core.config`` is imported anywhere
 from __future__ import annotations
 
 import os
+import shutil
 import tempfile
 import uuid
 from pathlib import Path
 
 _TEST_DB_PATH = Path(tempfile.gettempdir()) / f"areddu_portfolio_test_{uuid.uuid4().hex}.db"
+_TEST_MEDIA_DIR = Path(tempfile.gettempdir()) / f"areddu_portfolio_test_media_{uuid.uuid4().hex}"
 os.environ["DATABASE_URL"] = f"sqlite+aiosqlite:///{_TEST_DB_PATH.as_posix()}"
 os.environ["CONTACT_RATE_LIMIT_PER_HOUR"] = "1000"
 os.environ["SMTP_HOST"] = "127.0.0.1"
 os.environ["SMTP_PORT"] = "1"  # nothing listens here: delivery fails fast and deterministically
 os.environ["ENVIRONMENT"] = "test"
+os.environ["MEDIA_STORAGE_PATH"] = str(_TEST_MEDIA_DIR)
 
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
@@ -40,6 +43,7 @@ async def _prepared_database():
     await dispose_engine()
     if _TEST_DB_PATH.exists():
         _TEST_DB_PATH.unlink()
+    shutil.rmtree(_TEST_MEDIA_DIR, ignore_errors=True)
 
 
 @pytest_asyncio.fixture()

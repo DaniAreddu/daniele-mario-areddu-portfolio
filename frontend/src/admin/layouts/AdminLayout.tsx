@@ -2,6 +2,7 @@ import { clsx } from "clsx";
 import { NavLink, Outlet } from "react-router-dom";
 
 import { useAdminAuth } from "@/admin/auth/AdminAuthContext";
+import { CommandPalette } from "@/admin/components/CommandPalette";
 
 // This list grows across later phases (Speaking, Projects, Media, Site
 // administration, ...). With only a couple of entries today a simple
@@ -11,6 +12,22 @@ const NAV_ITEMS = [
   { to: "/admin", label: "Dashboard", end: true },
   { to: "/admin/speaking", label: "Speaking", end: false },
   { to: "/admin/projects", label: "Projects", end: false },
+  { to: "/admin/experience", label: "Experience", end: false },
+  { to: "/admin/education", label: "Education", end: false },
+  { to: "/admin/skills", label: "Skills", end: false },
+  { to: "/admin/community", label: "Community", end: false },
+  { to: "/admin/recognition", label: "Recognition", end: false },
+  { to: "/admin/profile", label: "Profile", end: false },
+  { to: "/admin/biography", label: "Biography", end: false },
+  { to: "/admin/media", label: "Media", end: false },
+  { to: "/admin/homepage", label: "Homepage", end: false },
+  { to: "/admin/navigation", label: "Navigation", end: false },
+  { to: "/admin/social-links", label: "Social links", end: false },
+  { to: "/admin/redirects", label: "Redirects", end: false },
+  { to: "/admin/site-settings", label: "Site settings", end: false },
+  { to: "/admin/seo-settings", label: "SEO settings", end: false },
+  { to: "/admin/audit-log", label: "Audit log", end: false },
+  { to: "/admin/system", label: "System", end: false },
   { to: "/admin/security", label: "Security", end: false },
 ] as const;
 
@@ -26,8 +43,10 @@ export function AdminLayout() {
 
   return (
     <div className="flex min-h-screen bg-paper-warm font-sans text-ink">
+      <CommandPalette />
       <aside className="hidden w-60 shrink-0 flex-col border-r border-ink/10 bg-paper p-6 lg:flex">
         <p className="font-serif text-lg text-ink">Webmaster</p>
+        <p className="mt-1 text-xs text-ink-faint">Press Ctrl/Cmd+K to search</p>
         <nav aria-label="Admin navigation" className="mt-8 flex flex-col gap-1">
           {NAV_ITEMS.map((item) => (
             <NavLink

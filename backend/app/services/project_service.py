@@ -24,6 +24,7 @@ def to_project_list_item(project: Project, locale: str) -> ProjectListItemOut:
         technologies=_project_technologies(project),
         is_featured=project.is_featured,
         external_url=project.external_url,
+        cover_image_url=project.cover_image_url,
     )
 
 
@@ -43,6 +44,7 @@ def to_project_detail(project: Project, locale: str) -> ProjectDetailOut:
         technologies=_project_technologies(project),
         related_skills=[skill.skill_name for skill in project.skills],
         external_url=project.external_url,
+        cover_image_url=project.cover_image_url,
         is_featured=project.is_featured,
     )
 

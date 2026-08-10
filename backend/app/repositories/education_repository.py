@@ -3,6 +3,7 @@ from __future__ import annotations
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.db.filters import visible_now
 from app.models.education import Education
 
 
@@ -12,6 +13,27 @@ class EducationRepository:
 
     async def list_all(self) -> list[Education]:
         result = await self.session.execute(
-            select(Education).order_by(Education.sort_order, Education.start_year)
+            select(Education)
+            .where(visible_now(Education))
+            .order_by(Education.sort_order, Education.start_year)
         )
         return list(result.scalars().all())
+
+    async def list_all_admin(self, *, include_trashed: bool = False) -> list[Education]:
+        stmt = select(Education)
+        if not include_trashed:
+            stmt = stmt.where(Education.deleted_at.is_(None))
+        stmt = stmt.order_by(Education.sort_order, Education.start_year)
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
+    async def get_by_id(self, education_id: int) -> Education | None:
+        return await self.session.get(Education, education_id)
+
+    async def create(self, education: Education) -> Education:
+        self.session.add(education)
+        await self.session.flush()
+        return education
+
+    async def delete(self, education: Education) -> None:
+        await self.session.delete(education)

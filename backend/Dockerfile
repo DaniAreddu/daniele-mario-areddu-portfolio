@@ -41,6 +41,11 @@ COPY --from=deps /app/.venv /app/.venv
 COPY --chown=app:app app ./app
 COPY --chown=app:app alembic ./alembic
 COPY --chown=app:app alembic.ini ./
+# Pre-create with app:app ownership so the media-data named volume mounted
+# here (see docker-compose.prod.yml) inherits writable ownership on first
+# mount instead of defaulting to root, which the non-root USER below can't
+# write into.
+RUN mkdir -p /app/media && chown app:app /app/media
 
 USER app
 EXPOSE 8000

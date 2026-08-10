@@ -39,6 +39,7 @@ class Project(TimestampMixin, PublishableMixin, SoftDeleteMixin, Base):
     technologies: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
     # Only rendered when present; never guessed.
     external_url: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    cover_image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     is_featured: Mapped[bool] = mapped_column(default=False)
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
     # Admin-only — never serialized in any public schema.

@@ -123,6 +123,37 @@ const FIXTURES: Record<string, unknown> = {
     gdg_devfest_count: 13,
   },
   "/events/geojson": { type: "FeatureCollection", features: [] },
+  "/navigation": {
+    header: [
+      { label: "Home", target: "/", is_external: false, open_in_new_tab: false },
+      { label: "About", target: "/about", is_external: false, open_in_new_tab: false },
+      { label: "Projects", target: "/projects", is_external: false, open_in_new_tab: false },
+      { label: "Speaking", target: "/speaking", is_external: false, open_in_new_tab: false },
+      { label: "Contact", target: "/contact", is_external: false, open_in_new_tab: false },
+    ],
+    footer: [
+      { label: "Privacy", target: "/privacy", is_external: false, open_in_new_tab: false },
+    ],
+  },
+  "/social-links": [],
+  "/homepage": {
+    hero_eyebrow: "Backend × AI × Communities",
+    hero_headline: "Building intelligent systems.\nSharing what I learn around the world.",
+    hero_subheadline: "Backend & AI Developer.",
+    primary_cta_label: "Explore my work",
+    primary_cta_url: "/projects",
+    secondary_cta_label: "Invite me to speak",
+    secondary_cta_url: "/contact",
+    section_order: ["about", "journey", "speaking", "projects", "community"],
+    section_visibility: {
+      about: true,
+      journey: true,
+      speaking: true,
+      projects: true,
+      community: true,
+    },
+    features: [],
+  },
 };
 
 export function installFetchMock() {

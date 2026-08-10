@@ -5,26 +5,70 @@ import { NavLink, useLocation } from "react-router-dom";
 
 import { useLocale } from "@/app/LocaleContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useNavigation } from "@/hooks/usePortfolioQueries";
+import type { NavigationItemPublic } from "@/types/api";
 
-const NAV_ITEMS = [
-  { path: "/", key: "nav.home" },
-  { path: "/about", key: "nav.about" },
-  { path: "/journey", key: "nav.journey" },
-  { path: "/projects", key: "nav.projects" },
-  { path: "/speaking", key: "nav.speaking" },
-  { path: "/community", key: "nav.community" },
-  { path: "/contact", key: "nav.contact" },
-] as const;
+// Used only when the navigation API call fails outright (backend down) — a
+// visitor should never be stranded with zero navigation. This is not the
+// normal content source; the CMS-managed list from useNavigation() is.
+const EMERGENCY_FALLBACK_ITEMS: NavigationItemPublic[] = [
+  { label: "Home", target: "/", is_external: false, open_in_new_tab: false },
+  { label: "Contact", target: "/contact", is_external: false, open_in_new_tab: false },
+];
+
+function NavLinkItem({
+  item,
+  className,
+  onClick,
+}: {
+  item: NavigationItemPublic;
+  className: (isActive: boolean) => string;
+  onClick?: () => void;
+}) {
+  const { localizedPath } = useLocale();
+
+  if (item.is_external) {
+    return (
+      <a
+        href={item.target}
+        target={item.open_in_new_tab ? "_blank" : undefined}
+        rel={item.open_in_new_tab ? "noreferrer noopener" : undefined}
+        className={className(false)}
+        onClick={onClick}
+      >
+        {item.label}
+      </a>
+    );
+  }
+
+  return (
+    <NavLink
+      to={localizedPath(item.target)}
+      end={item.target === "/"}
+      target={item.open_in_new_tab ? "_blank" : undefined}
+      rel={item.open_in_new_tab ? "noreferrer noopener" : undefined}
+      className={({ isActive }) => className(isActive)}
+      onClick={onClick}
+    >
+      {item.label}
+    </NavLink>
+  );
+}
 
 export function Nav() {
   const { t } = useTranslation();
   const { localizedPath } = useLocale();
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const navigation = useNavigation();
 
   useEffect(() => {
     setOpen(false);
   }, [location.pathname]);
+
+  const headerItems = navigation.isError
+    ? EMERGENCY_FALLBACK_ITEMS
+    : (navigation.data?.header ?? []);
 
   return (
     <header className="sticky top-0 z-50 border-b border-ink/10 bg-paper/90 backdrop-blur">
@@ -38,19 +82,16 @@ export function Nav() {
         </NavLink>
 
         <nav aria-label="Primary" className="hidden items-center gap-1 lg:flex">
-          {NAV_ITEMS.map((item) => (
-            <NavLink
-              key={item.path}
-              to={localizedPath(item.path)}
-              end={item.path === "/"}
-              className={({ isActive }) =>
+          {headerItems.map((item) => (
+            <NavLinkItem
+              key={`${item.target}-${item.label}`}
+              item={item}
+              className={(isActive) =>
                 `rounded-full px-3.5 py-2 text-sm transition-colors ${
                   isActive ? "font-medium text-ink" : "text-ink-faint hover:text-ink"
                 }`
               }
-            >
-              {t(item.key)}
-            </NavLink>
+            />
           ))}
         </nav>
 
@@ -80,19 +121,17 @@ export function Nav() {
           className="border-t border-ink/10 bg-paper lg:hidden"
         >
           <div className="container-editorial flex flex-col gap-1 py-4">
-            {NAV_ITEMS.map((item) => (
-              <NavLink
-                key={item.path}
-                to={localizedPath(item.path)}
-                end={item.path === "/"}
-                className={({ isActive }) =>
+            {headerItems.map((item) => (
+              <NavLinkItem
+                key={`${item.target}-${item.label}`}
+                item={item}
+                className={(isActive) =>
                   `rounded-xl px-4 py-3 text-base ${
                     isActive ? "bg-ink/5 font-medium text-ink" : "text-ink-soft"
                   }`
                 }
-              >
-                {t(item.key)}
-              </NavLink>
+                onClick={() => setOpen(false)}
+              />
             ))}
             <div className="mt-2 flex items-center justify-between px-4">
               <LanguageSwitcher />

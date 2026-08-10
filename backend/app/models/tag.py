@@ -22,6 +22,13 @@ project_tag = Table(
     Column("tag_id", ForeignKey("tag.id", ondelete="CASCADE"), primary_key=True),
 )
 
+experience_tag = Table(
+    "experience_tag",
+    Base.metadata,
+    Column("experience_id", ForeignKey("experience.id", ondelete="CASCADE"), primary_key=True),
+    Column("tag_id", ForeignKey("tag.id", ondelete="CASCADE"), primary_key=True),
+)
+
 
 class Tag(TimestampMixin, Base):
     """A single reusable, admin-managed tag (e.g. "AI", "FastAPI").

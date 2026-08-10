@@ -74,6 +74,11 @@ jobs:
           docker compose exec -T backend uv run alembic upgrade head
           docker compose exec -T backend uv run python -m app.seed.seed
 
+      - name: Bootstrap an admin account for the e2e suite
+        run: |
+          printf 'e2e-admin@example.com\ncorrect-horse-battery-staple-e2e\ncorrect-horse-battery-staple-e2e\n' | \
+            docker compose exec -T backend uv run python -m app.cli create-admin
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -90,9 +95,15 @@ jobs:
 
       - name: Run Playwright against the dev server
         working-directory: frontend
-        run: npx playwright test --project=chromium
+        # --workers=1: several admin specs mutate shared singleton content
+        # (site-wide homepage/navigation config) that other specs read and
+        # assert on — full serialization avoids cross-spec races on that
+        # shared state. This is a small suite, so the runtime cost is minor.
+        run: npx playwright test --project=chromium --workers=1
         env:
           VITE_API_PROXY_TARGET: http://localhost:8000
+          E2E_ADMIN_EMAIL: e2e-admin@example.com
+          E2E_ADMIN_PASSWORD: correct-horse-battery-staple-e2e
 
       - name: Tear down docker services
         if: always()

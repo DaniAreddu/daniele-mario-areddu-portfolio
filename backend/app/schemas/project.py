@@ -10,6 +10,7 @@ class ProjectListItemOut(ORMModel):
     technologies: list[str]
     is_featured: bool
     external_url: str | None
+    cover_image_url: str | None
 
 
 class ProjectDetailOut(ORMModel):
@@ -27,4 +28,5 @@ class ProjectDetailOut(ORMModel):
     technologies: list[str]
     related_skills: list[str]
     external_url: str | None
+    cover_image_url: str | None
     is_featured: bool

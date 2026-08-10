@@ -21,11 +21,13 @@ from app.models.community import CommunityActivity, CommunityProfile
 from app.models.education import Education
 from app.models.event import Event
 from app.models.experience import Experience
+from app.models.navigation_item import NavigationItem
 from app.models.passion import Passion
 from app.models.profile import Biography, Profile
 from app.models.project import Project, ProjectSkill
+from app.models.site_settings import HomepageFeature, HomepageSettings
 from app.models.skill import Skill, SkillCategory
-from app.models.tag import Tag, event_tag, project_tag
+from app.models.tag import Tag, event_tag, experience_tag, project_tag
 from app.models.talk import Talk
 from app.seed.data import (
     BIOGRAPHY,
@@ -61,6 +63,8 @@ async def _seed_profile(session: AsyncSession) -> None:
 
 async def _seed_education(session: AsyncSession) -> None:
     for item in EDUCATION:
+        item = dict(item)
+        item.setdefault("publication_status", "PUBLISHED")
         result = await session.execute(
             select(Education).where(
                 Education.institution == item["institution"],
@@ -77,6 +81,8 @@ async def _seed_education(session: AsyncSession) -> None:
 
 async def _seed_experience(session: AsyncSession) -> None:
     for item in EXPERIENCE:
+        item = dict(item)
+        item.setdefault("publication_status", "PUBLISHED")
         result = await session.execute(
             select(Experience).where(
                 Experience.organization == item["organization"],
@@ -85,10 +91,16 @@ async def _seed_experience(session: AsyncSession) -> None:
         )
         instance = result.scalars().first()
         if instance is None:
-            session.add(Experience(**item))
+            instance = Experience(**item)
+            session.add(instance)
+            await session.flush()
         else:
             for key, value in item.items():
                 setattr(instance, key, value)
+            await session.flush()
+        await _seed_tags_for(
+            session, experience_tag, "experience_id", instance.id, item.get("technologies", [])
+        )
 
 
 async def _seed_skills(session: AsyncSession) -> None:
@@ -274,6 +286,8 @@ async def _seed_passions(session: AsyncSession) -> None:
 async def _seed_community(session: AsyncSession) -> None:
     await _upsert_singleton(session, CommunityProfile, COMMUNITY_PROFILE)
     for item in COMMUNITY_ACTIVITIES:
+        item = dict(item)
+        item.setdefault("publication_status", "PUBLISHED")
         result = await session.execute(
             select(CommunityActivity).where(CommunityActivity.slug == item["slug"])
         )
@@ -283,6 +297,151 @@ async def _seed_community(session: AsyncSession) -> None:
         else:
             for key, value in item.items():
                 setattr(instance, key, value)
+
+
+_DEFAULT_NAV_ITEMS: list[dict[str, Any]] = [
+    {"label_en": "Home", "label_it": "Home", "target": "/", "placement": "header", "sort_order": 0},
+    {
+        "label_en": "About",
+        "label_it": "Chi sono",
+        "target": "/about",
+        "placement": "header",
+        "sort_order": 1,
+    },
+    {
+        "label_en": "Journey",
+        "label_it": "Percorso",
+        "target": "/journey",
+        "placement": "header",
+        "sort_order": 2,
+    },
+    {
+        "label_en": "Projects",
+        "label_it": "Progetti",
+        "target": "/projects",
+        "placement": "header",
+        "sort_order": 3,
+    },
+    {
+        "label_en": "Speaking",
+        "label_it": "Speaking",
+        "target": "/speaking",
+        "placement": "header",
+        "sort_order": 4,
+    },
+    {
+        "label_en": "Community",
+        "label_it": "Community",
+        "target": "/community",
+        "placement": "header",
+        "sort_order": 5,
+    },
+    {
+        "label_en": "Contact",
+        "label_it": "Contatti",
+        "target": "/contact",
+        "placement": "header",
+        "sort_order": 6,
+    },
+    {
+        "label_en": "Privacy",
+        "label_it": "Privacy",
+        "target": "/privacy",
+        "placement": "footer",
+        "sort_order": 0,
+    },
+]
+
+# Talk slug -> the specific event delivering it that best represents "featured
+# speaking appearance" on the homepage, resolved at seed time (see
+# _seed_homepage) since Talk itself has no public detail page to link to.
+_FEATURED_EVENT_SLUGS = ["gdg-almaty-2026", "agentcamp-sofia-2026", "devfest-vicenza-2026"]
+_FEATURED_PROJECT_SLUGS = [
+    "municipal-data-reconciliation-platform",
+    "production-ai-agent-architectures",
+]
+
+
+async def _seed_navigation(session: AsyncSession) -> None:
+    """One-time bootstrap only: populates the CMS-managed navigation from the
+    site's original hardcoded nav (`Nav.tsx`'s old static `NAV_ITEMS` plus the
+    footer's Privacy link) so the public site's menu is unchanged the moment
+    NavigationItem-driven rendering ships.
+
+    Unlike `_seed_profile`/`_seed_community` above, this is deliberately NOT
+    re-applied once any navigation item already exists — Navigation is meant
+    to become fully admin-owned after this one-time migration (including
+    admin deletions staying deleted), not perpetually reset by re-running the
+    seed script.
+    """
+    existing = await session.execute(select(NavigationItem.id).limit(1))
+    if existing.scalars().first() is not None:
+        return
+    for item in _DEFAULT_NAV_ITEMS:
+        session.add(
+            NavigationItem(**item, is_external=False, open_in_new_tab=False, enabled=True)
+        )
+
+
+async def _seed_homepage(session: AsyncSession) -> None:
+    """One-time bootstrap only, same rationale as `_seed_navigation`: copies
+    the site's original hardcoded hero copy/CTAs (previously living directly
+    in `HomePage.tsx`, plus `Profile.positioning_statement_*` for the
+    subheadline) into the CMS `HomepageSettings` singleton, and pins the
+    projects/talks that were previously featured via ad-hoc `is_featured`
+    flags as CMS-managed `HomepageFeature` rows. Only runs while the
+    singleton is still in its untouched default state / the feature list is
+    still empty — an admin's homepage edits are never overwritten by re-
+    running the seed.
+    """
+    result = await session.execute(select(HomepageSettings).limit(1))
+    settings = result.scalars().first()
+    if settings is None:
+        settings = HomepageSettings()
+        session.add(settings)
+        await session.flush()
+
+    if not settings.hero_headline_en:
+        settings.hero_eyebrow_en = PROFILE["brand_label"]
+        settings.hero_eyebrow_it = PROFILE["brand_label"]
+        settings.hero_headline_en = (
+            "Building intelligent systems.\nSharing what I learn around the world."
+        )
+        settings.hero_headline_it = (
+            "Costruisco sistemi intelligenti.\nCondivido ciò che imparo in giro per il mondo."
+        )
+        settings.hero_subheadline_en = PROFILE["positioning_statement_en"]
+        settings.hero_subheadline_it = PROFILE["positioning_statement_it"]
+        settings.primary_cta_label_en = "Explore my work"
+        settings.primary_cta_label_it = "Esplora i miei lavori"
+        settings.primary_cta_url = "/projects"
+        settings.secondary_cta_label_en = "Invite me to speak"
+        settings.secondary_cta_label_it = "Invitami a parlare"
+        settings.secondary_cta_url = "/contact"
+        settings.section_order = ["about", "journey", "speaking", "projects", "community"]
+        settings.section_visibility = {
+            "about": True,
+            "journey": True,
+            "speaking": True,
+            "projects": True,
+            "community": True,
+        }
+
+    existing_features = await session.execute(select(HomepageFeature.id).limit(1))
+    if existing_features.scalars().first() is not None:
+        return
+
+    for slug in _FEATURED_PROJECT_SLUGS:
+        project_result = await session.execute(select(Project.id).where(Project.slug == slug))
+        project_id = project_result.scalars().first()
+        if project_id is not None:
+            session.add(HomepageFeature(entity_type="project", entity_id=project_id))
+
+    for slug in _FEATURED_EVENT_SLUGS:
+        event_result = await session.execute(select(Event.id).where(Event.slug == slug))
+        event_id = event_result.scalars().first()
+        if event_id is not None:
+            session.add(HomepageFeature(entity_type="event", entity_id=event_id))
 
 
 async def seed_all() -> None:
@@ -298,6 +457,8 @@ async def seed_all() -> None:
         await _seed_projects(session)
         await _seed_passions(session)
         await _seed_community(session)
+        await _seed_navigation(session)
+        await _seed_homepage(session)
         await session.commit()
     logger.info("seed_completed")
 

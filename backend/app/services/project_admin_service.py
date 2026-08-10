@@ -60,6 +60,7 @@ def _to_admin_out(project: Project) -> ProjectAdminOut:
         confidentiality_note_en=project.confidentiality_note_en,
         confidentiality_note_it=project.confidentiality_note_it,
         external_url=project.external_url,
+        cover_image_url=project.cover_image_url,
         is_featured=project.is_featured,
         sort_order=project.sort_order,
         internal_notes=project.internal_notes,

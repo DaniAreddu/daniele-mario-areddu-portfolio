@@ -65,3 +65,38 @@ export async function adminApiFetch<T>(
   }
   return (await response.json()) as T;
 }
+
+/**
+ * Multipart upload variant of `adminApiFetch` — a file body can't be
+ * JSON-stringified, and setting `Content-Type` manually for FormData would
+ * strip the multipart boundary the browser generates, so this intentionally
+ * does not reuse the JSON path above beyond error handling.
+ */
+export async function adminApiUpload<T>(path: string, file: File): Promise<T> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(`${ADMIN_API_BASE_URL}${path}`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "X-Requested-With": "admin-spa" },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    let errorBody: ApiErrorBody | null = null;
+    try {
+      errorBody = (await response.json()) as ApiErrorBody;
+    } catch {
+      // Response had no JSON body; fall through to a generic error.
+    }
+    throw new AdminApiError(
+      response.status,
+      errorBody?.error.code ?? "unknown_error",
+      errorBody?.error.message ?? "Something went wrong. Please try again.",
+      errorBody?.error.details,
+    );
+  }
+
+  return (await response.json()) as T;
+}

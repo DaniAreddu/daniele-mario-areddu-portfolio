@@ -19,6 +19,7 @@ class SkillService:
                 skills=[
                     SkillOut(name=skill.name, context=pick(skill, "context", locale))
                     for skill in category.skills
+                    if skill.enabled
                 ],
             )
             for category in categories

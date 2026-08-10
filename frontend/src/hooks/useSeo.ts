@@ -45,6 +45,10 @@ export interface SeoOptions {
   /** Unprefixed, canonical path e.g. "/about" (never "/it/about"). */
   path: string;
   jsonLd?: unknown;
+  /** Absolute or site-relative image URL for og:image/twitter:image. Falls
+   * back to nothing (no tag) when omitted — callers are not required to
+   * provide one. */
+  image?: string | null;
   /** Set to false while critical above-the-fold data is still loading, so the
    * prerender script can wait for real content before snapshotting the page. */
   ready?: boolean;
@@ -57,6 +61,7 @@ export function useSeo({
   description,
   path,
   jsonLd,
+  image,
   ready = true,
   noIndex = false,
 }: SeoOptions): void {
@@ -71,6 +76,10 @@ export function useSeo({
     upsertMeta("name", "twitter:card", "summary_large_image");
     upsertMeta("name", "twitter:title", title);
     upsertMeta("name", "twitter:description", description);
+    if (image) {
+      upsertMeta("property", "og:image", image);
+      upsertMeta("name", "twitter:image", image);
+    }
     upsertMeta("name", "robots", noIndex ? "noindex, nofollow" : "index, follow");
 
     const canonicalPath = localizedPathFor(path, locale);
@@ -79,7 +88,7 @@ export function useSeo({
     upsertLink("alternate", `${SITE_URL}${localizedPathFor(path, "it")}`, "it");
 
     if (jsonLd) upsertJsonLd(path, jsonLd);
-  }, [title, description, path, locale, jsonLd, noIndex]);
+  }, [title, description, path, locale, jsonLd, image, noIndex]);
 
   useEffect(() => {
     if (ready) {

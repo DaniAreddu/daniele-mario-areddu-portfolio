@@ -28,6 +28,8 @@ services:
       DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
       ENVIRONMENT: production
       DOCS_ENABLED: ${DOCS_ENABLED:-false}
+    volumes:
+      - media-data:/app/media
     depends_on:
       db:
         condition: service_healthy
@@ -91,3 +93,4 @@ services:
 
 volumes:
   db-data:
+  media-data:

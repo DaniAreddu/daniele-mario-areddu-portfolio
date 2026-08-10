@@ -102,6 +102,31 @@ async def test_publishing_a_draft_makes_it_publicly_visible(client, db_session):
     assert set(public_detail.json()["technologies"]) == {"Python", "FastAPI"}
 
 
+async def test_cover_image_url_round_trips_to_public_api(client, db_session):
+    await _create_and_login_admin(client, db_session)
+    payload = _minimal_project_payload(cover_image_url="https://example.com/cover.png")
+    create = await client.post("/api/v1/admin/projects", json=payload, headers=SPA_HEADERS)
+    assert create.status_code == 201
+    assert create.json()["cover_image_url"] == "https://example.com/cover.png"
+    project_id = create.json()["id"]
+
+    await client.post(f"/api/v1/admin/projects/{project_id}/publish", headers=SPA_HEADERS)
+
+    public_list = await client.get("/api/v1/projects")
+    published = next(p for p in public_list.json() if p["slug"] == payload["slug"])
+    assert published["cover_image_url"] == "https://example.com/cover.png"
+
+    public_detail = await client.get(f"/api/v1/projects/{payload['slug']}")
+    assert public_detail.json()["cover_image_url"] == "https://example.com/cover.png"
+
+
+async def test_cover_image_url_rejects_non_http_values(client, db_session):
+    await _create_and_login_admin(client, db_session)
+    payload = _minimal_project_payload(cover_image_url="javascript:alert(1)")
+    response = await client.post("/api/v1/admin/projects", json=payload, headers=SPA_HEADERS)
+    assert response.status_code == 422
+
+
 async def test_trash_and_restore_roundtrip(client, db_session):
     await _create_and_login_admin(client, db_session)
     payload = _minimal_project_payload()

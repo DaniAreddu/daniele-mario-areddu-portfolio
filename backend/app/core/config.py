@@ -72,6 +72,17 @@ class Settings(BaseSettings):
     #   python -c "from cryptography.fernet import Fernet as F; print(F.generate_key().decode())"
     admin_totp_encryption_key: str = "fGh_Xp7R2VXN4o-pnC2FE6B7MFIPEhqTIsQGVfujB74="
 
+    # Media storage. STORAGE_BACKEND is the documented upgrade seam for a
+    # real S3-compatible backend later — only "local" is implemented today
+    # (see app/services/storage.py).
+    storage_backend: str = "local"
+    media_storage_path: str = "/app/media"
+    # Served under /api/v1/media/{key} so it flows through the gateway's
+    # existing `location /api/` rate-limited proxy block — no new nginx
+    # location needed.
+    media_public_base_url: str = "/api/v1/media"
+    media_max_upload_bytes: int = 10 * 1024 * 1024
+
     @field_validator("cors_origins", "trusted_hosts", "supported_locales", mode="before")
     @classmethod
     def _split_csv(cls, value: object) -> object:

@@ -10,12 +10,15 @@ import type {
   EventItem,
   EventStats,
   GeoJsonFeatureCollection,
+  Homepage,
   JourneyMilestone,
+  Navigation,
   Passion,
   Profile,
   ProjectDetail,
   ProjectListItem,
   SkillCategory,
+  SocialLink,
   Talk,
   Experience as WorkExperience,
 } from "@/types/api";
@@ -163,6 +166,32 @@ export function useCommunity() {
   return useQuery({
     queryKey: ["community", locale],
     queryFn: () => apiFetch<CommunityProfile>("/community", { lang: locale }),
+    staleTime: STALE_TIME,
+  });
+}
+
+export function useSocialLinks() {
+  return useQuery({
+    queryKey: ["social-links"],
+    queryFn: () => apiFetch<SocialLink[]>("/social-links"),
+    staleTime: STALE_TIME,
+  });
+}
+
+export function useNavigation() {
+  const { locale } = useLocale();
+  return useQuery({
+    queryKey: ["navigation", locale],
+    queryFn: () => apiFetch<Navigation>("/navigation", { lang: locale }),
+    staleTime: STALE_TIME,
+  });
+}
+
+export function useHomepage() {
+  const { locale } = useLocale();
+  return useQuery({
+    queryKey: ["homepage", locale],
+    queryFn: () => apiFetch<Homepage>("/homepage", { lang: locale }),
     staleTime: STALE_TIME,
   });
 }

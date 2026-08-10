@@ -20,6 +20,15 @@ class RevisionRepository:
         )
         return list(result.scalars().all())
 
+    async def list_recent(self, limit: int = 10) -> list[Revision]:
+        result = await self.session.execute(
+            select(Revision)
+            .options(selectinload(Revision.created_by))
+            .order_by(Revision.created_at.desc())
+            .limit(limit)
+        )
+        return list(result.scalars().all())
+
     async def get(self, revision_id: int) -> Revision | None:
         result = await self.session.execute(
             select(Revision)

@@ -9,17 +9,34 @@ extended as each phase ships — see the "Status" note at the top of each sectio
 
 - ✅ Authentication: email + Argon2id password, optional TOTP two-factor, server-side
   sessions, audit logging, CLI bootstrap/recovery.
-- ✅ Speaking (`/admin/speaking`): full draft → preview → publish → schedule →
-  unpublish → archive → trash → restore lifecycle, revision history with restore,
-  duplicate-appearance detection, an admin-managed tag vocabulary shared across
-  content types.
-- ✅ Projects (`/admin/projects`): the same lifecycle/revision/tag pattern as
-  Speaking, applied to project case studies.
-- 🚧 Experience, Education, Skills, Community, Biography, Recognition follow the
-  identical, now-proven pattern (see "Extending to a new content type" below) but
-  are not yet built. Media library and site administration (homepage, navigation,
-  SEO, redirects, settings) are designed but not yet built. This document grows a
-  section for each as it lands.
+- ✅ Speaking (`/admin/speaking`) and Projects (`/admin/projects`): full draft →
+  preview → publish → schedule → unpublish → archive → trash → restore lifecycle,
+  revision history with restore, an admin-managed tag vocabulary shared across
+  content types (Speaking also has duplicate-appearance detection).
+- ✅ Experience (`/admin/experience`) and Education (`/admin/education`): the same
+  lifecycle/revision pattern (Experience also shares the Tag vocabulary).
+- ✅ Community (`/admin/community`): activities follow the full lifecycle pattern;
+  the community profile (`/admin/community/profile`) is a singleton, always-live,
+  no draft state (edited directly, revisions still recorded).
+- ✅ Recognition (`/admin/recognition`): certifications/awards/recognition/publications
+  in one lifecycle-enabled table, distinguished by a `kind` field.
+- ✅ Profile (`/admin/profile`) and Biography (`/admin/biography`): singletons, same
+  pattern as the community profile.
+- ✅ Skills (`/admin/skills`): categories and skills are plain CRUD with an `enabled`
+  switch — no draft/publish lifecycle, since a skill list is a structured settings
+  page, not long-form content (see "Extending to a new content type" for when a
+  content type should skip the lifecycle machinery entirely).
+- ✅ Media library (`/admin/media`): upload (JPEG/PNG/WEBP/GIF, validated by
+  decoding — never by trusting the filename or `Content-Type`), automatic
+  thumbnail/medium variants, alt text/caption editing, usage-aware delete (warns
+  and requires confirmation before deleting a file referenced by other content).
+  See "Media library" below.
+- ✅ Site administration (`/admin/navigation`, `/admin/social-links`,
+  `/admin/redirects`, `/admin/site-settings`, `/admin/seo-settings`,
+  `/admin/homepage`): see "Site administration" below.
+- ✅ Dashboard (`/admin`), global search (Ctrl/Cmd+K from anywhere in the admin
+  area), audit log browser (`/admin/audit-log`), and system health
+  (`/admin/system`): see "Dashboard, search, audit log, and system health" below.
 
 ## Extending to a new content type
 
@@ -57,6 +74,94 @@ same shape — read `app/services/event_admin_service.py` and
    cleanup fixture** — the test database is shared across the whole suite, so any
    content created by admin tests must delete its own rows (and their
    `Revision`/`AuditEvent` rows) afterward or it will corrupt other tests' counts.
+
+## Media library
+
+Upload images from `/admin/media`. Validation is intentionally never based on the
+client-supplied filename or `Content-Type` header — the backend decodes every
+upload with Pillow and rejects anything that isn't a real JPEG/PNG/WEBP/GIF (this
+also catches disguised files and most decompression-bomb attempts, since Pillow's
+default `MAX_IMAGE_PIXELS` guard is left on). Two smaller variants (`thumbnail`,
+`medium`) are generated automatically as WEBP; the original is stored unmodified.
+
+Every stored file gets a server-generated key (`uuid4().hex` plus an extension) —
+**never** derived from the original filename — which is what makes the public
+`GET /api/v1/media/{key}` route safe to leave unauthenticated: the key itself is
+the access control (unguessable, no path-traversal surface since it never contains
+user input), and the original filename is kept purely as display metadata. Files
+live outside PostgreSQL in a dedicated Docker volume (`media-data`), never as
+database blobs.
+
+Deleting a file checks whether any other content still references its URL (project
+cover images, event images, experience/education logos) and requires an explicit
+"delete anyway" confirmation if so, rather than silently breaking a live page.
+
+## Site administration
+
+These screens replace hand-editing source code for the handful of settings/content
+sections needed to stand up the public site end to end:
+
+- **Navigation** (`/admin/navigation`) — header and footer links in one list,
+  distinguished by a `placement` field. Each item has separate English/Italian
+  labels (`label_en`/`label_it`, matching the bilingual-column convention used
+  everywhere else) and a `target` that must be an internal path (starting with
+  `/`) unless `is_external` is checked, in which case it must be a full
+  `http(s)://` URL — enforced server-side, not just in the form.
+- **Social links** (`/admin/social-links`) — shown in the site footer. The `icon`
+  field is checked against a small fixed allow-list (`github`, `linkedin`,
+  `twitter`, `mastodon`, `youtube`, `instagram`, `rss`, `mail`, `globe`,
+  `sessionize`) that matches the frontend's icon lookup table — an unrecognized
+  name is rejected at write time rather than silently rendering nothing.
+- **Redirects** (`/admin/redirects`) — both the source and destination path must be
+  internal (start with `/`); there is no way to configure a redirect to an
+  external domain, which removes open-redirect risk by construction rather than
+  by allow-listing hosts. Creating or editing a redirect is also checked against
+  every existing redirect for a loop (including indirect chains up to 20 hops) and
+  against duplicate source paths, both rejected before they reach the database.
+- **Site settings** (`/admin/site-settings`) — a singleton: site name, default
+  timezone/language, a maintenance-mode flag, and the boolean switches that decide
+  whether the speaking map, statistics, "now" section, projects, and community
+  sections appear on the public site at all.
+- **SEO settings** (`/admin/seo-settings`) — a singleton: default page title
+  template, default meta description, default Open Graph image, Twitter card
+  type, default `robots` directive, and canonical base URL. These are global
+  fallbacks; the frontend's `useSeo` hook still lets any individual page set its
+  own title/description/image, which take precedence.
+- **Homepage** (`/admin/homepage`) — a singleton for the hero copy (eyebrow,
+  headline, subheadline, both languages), the two call-to-action buttons, and
+  which page sections are visible; plus a **featured items** list that pins
+  specific published projects or speaking appearances to the homepage by id
+  (validated to exist, and resolved against each entity's normal public
+  visibility rules — an item that's later unpublished or trashed simply
+  disappears from the homepage response rather than leaking draft content or
+  erroring).
+
+All six are plain create/update/delete operations with audit logging but no
+draft/publish lifecycle — see "Extending to a new content type" above for when a
+content type should skip the six-lifecycle-endpoint pattern entirely (a nav link
+or a redirect has no meaningful "draft" state distinct from "not created yet").
+
+## Dashboard, search, audit log, and system health
+
+- **Dashboard** (`/admin`) — real, computed-on-demand counts (never cached or
+  hardcoded) of published/draft/scheduled/archived/trashed items per content
+  type, plus upcoming speaking appearances, total media files, and a recent
+  activity feed pulled from the audit log.
+- **Global search** — press **Ctrl+K** (or **Cmd+K** on macOS) anywhere in the
+  admin area to open a command palette that searches across every content type,
+  media filenames, navigation items, and social links by a simple substring
+  match. Results link straight to each item's editor. This is an admin-only,
+  authenticated endpoint — it can (deliberately) surface drafts, since finding
+  your own unpublished work is the point.
+- **Audit log** (`/admin/audit-log`) — every administrative mutation (not just
+  content — logins, 2FA changes, everything), filterable by content type, newest
+  first. Also lists the most recent revisions (point-in-time content snapshots)
+  across every content type.
+- **System health** (`/admin/system`) — a quick operational glance: database
+  connectivity, whether the database's applied Alembic migration matches the
+  code's expected migration head, and whether the media storage backend is
+  writable. Deliberately never renders a connection string, key, or other secret
+  value — only booleans and short status labels.
 
 ## Creating the first administrator
 
@@ -175,7 +280,7 @@ policy.
 - Authorization is enforced server-side on every `/api/v1/admin/*` route
   (`get_current_admin_user`) — the admin UI hiding a button is never the actual
   security boundary.
-- All administrative actions (sign-in/out, 2FA changes, and — from the Speaking
-  module onward — every content mutation) are recorded in an audit log, viewable
-  from the admin UI once that screen ships. Passwords, session tokens, TOTP secrets,
-  and recovery codes are never logged or audited in plaintext.
+- All administrative actions (sign-in/out, 2FA changes, and every content
+  mutation) are recorded in an audit log, viewable and filterable from
+  `/admin/audit-log`. Passwords, session tokens, TOTP secrets, and recovery codes
+  are never logged or audited in plaintext.

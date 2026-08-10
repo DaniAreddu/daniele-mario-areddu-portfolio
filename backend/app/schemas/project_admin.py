@@ -30,12 +30,13 @@ class ProjectAdminWriteBase(BaseModel):
     confidentiality_note_en: str = ""
     confidentiality_note_it: str = ""
     external_url: str | None = None
+    cover_image_url: str | None = None
     is_featured: bool = False
     sort_order: int = 0
     internal_notes: str | None = None
     tag_labels: list[str] = Field(default_factory=list)
 
-    @field_validator("external_url")
+    @field_validator("external_url", "cover_image_url")
     @classmethod
     def _validate_url(cls, value: str | None) -> str | None:
         if value and not (value.startswith("http://") or value.startswith("https://")):
@@ -75,6 +76,7 @@ class ProjectAdminOut(ORMModel):
     confidentiality_note_en: str
     confidentiality_note_it: str
     external_url: str | None
+    cover_image_url: str | None
     is_featured: bool
     sort_order: int
     internal_notes: str | None

@@ -202,6 +202,54 @@ export interface CommunityProfile {
   activities: CommunityActivity[];
 }
 
+export interface SocialLink {
+  label: string;
+  url: string;
+  icon: string | null;
+}
+
+export interface NavigationItemPublic {
+  label: string;
+  target: string;
+  is_external: boolean;
+  open_in_new_tab: boolean;
+}
+
+export interface Navigation {
+  header: NavigationItemPublic[];
+  footer: NavigationItemPublic[];
+}
+
+export interface HomepageFeatureItem {
+  entity_type: string;
+  title: string;
+  summary: string;
+  url_path: string;
+  image_url: string | null;
+}
+
+export interface Homepage {
+  hero_eyebrow: string;
+  hero_headline: string;
+  hero_subheadline: string;
+  primary_cta_label: string | null;
+  primary_cta_url: string | null;
+  secondary_cta_label: string | null;
+  secondary_cta_url: string | null;
+  section_order: string[];
+  section_visibility: Record<string, boolean>;
+  features: HomepageFeatureItem[];
+}
+
+export interface RecognitionOut {
+  kind: string;
+  title: string;
+  issuer: string | null;
+  description: string | null;
+  date_awarded: string | null;
+  url: string | null;
+}
+
 export interface JourneyMilestone {
   year: number | null;
   title: string;

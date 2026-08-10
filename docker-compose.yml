@@ -44,6 +44,7 @@ services:
     volumes:
       - ./backend:/app
       - backend-venv:/app/.venv
+      - media-data:/app/media
     ports:
       - "8000:8000"
     depends_on:
@@ -100,3 +101,4 @@ volumes:
   db-data:
   backend-venv:
   frontend-node-modules:
+  media-data:
