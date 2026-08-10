@@ -1,3 +1,4 @@
+import { sortEventsAscending } from "@/features/speaking/eventSort";
 import type { EventItem } from "@/types/api";
 
 const HOME_COUNTRY = "Italy";
@@ -17,10 +18,7 @@ export interface ExpansionYearGroup {
  * Entirely derived from real event data: nothing here is a hardcoded list
  * of years or places. */
 export function computeExpansionByYear(events: EventItem[]): ExpansionYearGroup[] {
-  const sorted = [...events].sort((a, b) => {
-    if (a.year !== b.year) return a.year - b.year;
-    return (a.month ?? 99) - (b.month ?? 99);
-  });
+  const sorted = sortEventsAscending(events);
 
   const byYear = new Map<number, { all: string[]; international: string[] }>();
   for (const event of sorted) {

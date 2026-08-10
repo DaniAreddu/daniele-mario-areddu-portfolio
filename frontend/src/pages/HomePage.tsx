@@ -7,6 +7,7 @@ import { useLocale } from "@/app/LocaleContext";
 import { ErrorState, LoadingState } from "@/components/AsyncState";
 import { Monogram } from "@/components/Monogram";
 import { RouteMotif } from "@/components/RouteMotif";
+import { sortEventsAscending } from "@/features/speaking/eventSort";
 import {
   useBiography,
   useCommunity,
@@ -74,9 +75,7 @@ export default function HomePage() {
     hero.section_order.length > 0 ? hero.section_order : DEFAULT_SECTION_ORDER;
   const isSectionVisible = (key: string) => hero.section_visibility[key] !== false;
 
-  const sortedEvents = [...(events.data ?? [])].sort(
-    (a, b) => a.year - b.year || (a.month ?? 99) - (b.month ?? 99),
-  );
+  const sortedEvents = sortEventsAscending(events.data ?? []);
   const milestoneCities = [
     ...new Set(
       sortedEvents

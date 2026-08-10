@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 
 import { formatEventDate } from "@/features/speaking/EventList";
+import { sortEventsAscending } from "@/features/speaking/eventSort";
 import { StatusBadge } from "@/features/speaking/StatusBadge";
 import type { EventItem } from "@/types/api";
 
@@ -17,10 +18,7 @@ export function UpcomingEvents({ events, onSelect }: UpcomingEventsProps) {
 
   if (events.length === 0) return null;
 
-  const sorted = [...events].sort((a, b) => {
-    if (a.year !== b.year) return a.year - b.year;
-    return (a.month ?? 99) - (b.month ?? 99);
-  });
+  const sorted = sortEventsAscending(events);
 
   return (
     <section className="mt-16 border-t border-ink/10 pt-10">

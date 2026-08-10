@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 
+import { sortEventsAscending } from "@/features/speaking/eventSort";
 import type { EventItem } from "@/types/api";
 
 interface InternationalMilestonesProps {
@@ -17,9 +18,7 @@ export function InternationalMilestones({ events, onSelect }: InternationalMiles
 
   if (events.length === 0) return null;
 
-  const sorted = [...events].sort(
-    (a, b) => a.year - b.year || (a.month ?? 99) - (b.month ?? 99),
-  );
+  const sorted = sortEventsAscending(events);
 
   return (
     <section className="mt-16 border-t border-ink/10 pt-10">

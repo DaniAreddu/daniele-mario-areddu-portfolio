@@ -8,6 +8,7 @@ import { ErrorState, LoadingState } from "@/components/AsyncState";
 import { EventDetailPanel } from "@/features/speaking/EventDetailPanel";
 import { EventFilters } from "@/features/speaking/EventFilters";
 import { EventList } from "@/features/speaking/EventList";
+import { sortEventsDescending } from "@/features/speaking/eventSort";
 import { ExpansionTimeline } from "@/features/speaking/ExpansionTimeline";
 import { InternationalMilestones } from "@/features/speaking/InternationalMilestones";
 import { MapBoundary } from "@/features/speaking/MapBoundary";
@@ -70,12 +71,14 @@ export default function SpeakingPage() {
     [events.data, state.event],
   );
 
+  // Sorted by event date, newest first — matches the catalogue's default
+  // order and the "newest event first" rule for same-location popups.
+  const sortedEvents = useMemo(() => sortEventsDescending(events.data ?? []), [events.data]);
+
   const groupedEvents = useMemo(
     () =>
-      locationGroup
-        ? (events.data ?? []).filter((event) => locationGroup.includes(event.slug))
-        : [],
-    [events.data, locationGroup],
+      locationGroup ? sortedEvents.filter((event) => locationGroup.includes(event.slug)) : [],
+    [sortedEvents, locationGroup],
   );
 
   const handleSelectEvent = (slug: string | undefined) => {
@@ -210,7 +213,7 @@ export default function SpeakingPage() {
                 </MapBoundary>
               ) : (
                 <EventList
-                  events={events.data ?? []}
+                  events={sortedEvents}
                   selectedSlug={state.event}
                   onSelect={handleSelectEvent}
                 />
@@ -258,7 +261,7 @@ export default function SpeakingPage() {
         <h2 className="eyebrow">{t("speaking.eventCatalogueTitle")}</h2>
         {events.data ? (
           <EventList
-            events={events.data}
+            events={sortedEvents}
             selectedSlug={state.event}
             onSelect={handleSelectEvent}
           />

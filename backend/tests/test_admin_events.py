@@ -88,6 +88,22 @@ async def test_create_event_requires_spa_header(client, db_session):
     assert response.status_code == 400
 
 
+async def test_admin_events_list_defaults_to_event_date_descending(client, db_session):
+    """Never id/created_at/insertion order — the admin list defaults to
+    newest event date first, same contract as the public list."""
+    await _create_and_login_admin(client, db_session)
+    older = _minimal_event_payload(year=2025, month=3)
+    newer = _minimal_event_payload(year=2027, month=1)
+    # Create the older event LAST, so an id/created_at/insertion-order sort
+    # would (wrongly) place it before the newer one.
+    await client.post("/api/v1/admin/events", json=newer, headers=SPA_HEADERS)
+    await client.post("/api/v1/admin/events", json=older, headers=SPA_HEADERS)
+
+    response = await client.get("/api/v1/admin/events")
+    slugs = [item["slug"] for item in response.json()]
+    assert slugs.index(newer["slug"]) < slugs.index(older["slug"])
+
+
 # -- create / draft / publish lifecycle -------------------------------------
 
 

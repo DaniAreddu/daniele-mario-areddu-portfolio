@@ -11,6 +11,21 @@ from app.models.event import Event
 
 _EAGER = (selectinload(Event.talk), selectinload(Event.tags))
 
+# Newest-event-date-first, for every surface that lists events (public list,
+# geojson, admin list). Deliberately never touches id/created_at/updated_at —
+# only the real event date. Events known only to a year (no month) or a
+# year+month (no day) are never guessed at: they simply sort after
+# same-year/same-month events that do have that precision, in both
+# directions, rather than being assigned an invented day.
+_EVENT_DATE_DESC_ORDER = (
+    Event.year.desc(),
+    Event.month.is_(None),
+    Event.month.desc(),
+    Event.start_date.is_(None),
+    Event.start_date.desc(),
+    Event.slug.asc(),
+)
+
 
 def _normalize(value: str) -> str:
     return re.sub(r"[^a-z0-9]", "", value.lower())
@@ -27,7 +42,7 @@ class EventRepository:
             select(Event)
             .options(*_EAGER)
             .where(visible_now(Event))
-            .order_by(Event.start_date.is_(None), Event.start_date.desc(), Event.year.desc())
+            .order_by(*_EVENT_DATE_DESC_ORDER)
         )
         return list(result.scalars().all())
 
@@ -44,6 +59,7 @@ class EventRepository:
             select(Event)
             .options(*_EAGER)
             .where(Event.latitude.is_not(None), Event.longitude.is_not(None), visible_now(Event))
+            .order_by(*_EVENT_DATE_DESC_ORDER)
         )
         return list(result.scalars().all())
 
@@ -53,7 +69,7 @@ class EventRepository:
         stmt = select(Event).options(*_EAGER)
         if not include_trashed:
             stmt = stmt.where(Event.deleted_at.is_(None))
-        stmt = stmt.order_by(Event.created_at.desc())
+        stmt = stmt.order_by(*_EVENT_DATE_DESC_ORDER)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 

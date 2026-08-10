@@ -1,5 +1,29 @@
 from __future__ import annotations
 
+from functools import cmp_to_key
+
+
+def _compare_events_desc(a: dict, b: dict) -> int:
+    """Mirrors the intended contract of EventRepository's ordering: newest
+    event date first, using only year/month/start_date — never id,
+    created_at, updated_at, or insertion order — and never inventing a
+    missing month or day."""
+    if a["year"] != b["year"]:
+        return b["year"] - a["year"]
+    a_has_month, b_has_month = a["month"] is not None, b["month"] is not None
+    if a_has_month != b_has_month:
+        return -1 if a_has_month else 1
+    if a_has_month and a["month"] != b["month"]:
+        return b["month"] - a["month"]
+    a_has_date, b_has_date = a["start_date"] is not None, b["start_date"] is not None
+    if a_has_date != b_has_date:
+        return -1 if a_has_date else 1
+    if a_has_date and a["start_date"] != b["start_date"]:
+        return -1 if a["start_date"] > b["start_date"] else 1
+    if a["slug"] != b["slug"]:
+        return -1 if a["slug"] < b["slug"] else 1
+    return 0
+
 
 async def test_events_list_and_count(client):
     response = await client.get("/api/v1/events")
@@ -152,6 +176,24 @@ async def test_geojson_toronto_events_share_coordinates(client):
     assert len(toronto_features) == 2
     coords = {tuple(f["geometry"]["coordinates"]) for f in toronto_features}
     assert len(coords) == 1  # same city -> same coordinates, by design
+
+
+async def test_events_are_sorted_by_event_date_descending(client):
+    """Regression test for the year/month/day event-date ordering contract —
+    see EventRepository._EVENT_DATE_DESC_ORDER."""
+    response = await client.get("/api/v1/events")
+    body = response.json()
+    expected = sorted(body, key=cmp_to_key(_compare_events_desc))
+    assert [item["slug"] for item in body] == [item["slug"] for item in expected]
+
+
+async def test_geojson_same_coordinate_events_are_newest_first(client):
+    response = await client.get("/api/v1/events/geojson")
+    body = response.json()
+    toronto = [f["properties"] for f in body["features"] if f["properties"]["city"] == "Toronto"]
+    assert len(toronto) == 2
+    expected = sorted(toronto, key=cmp_to_key(_compare_events_desc))
+    assert [item["slug"] for item in toronto] == [item["slug"] for item in expected]
 
 
 async def test_geojson_handles_events_with_only_a_known_year_gracefully(client):
