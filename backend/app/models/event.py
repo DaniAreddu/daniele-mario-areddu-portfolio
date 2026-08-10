@@ -6,13 +6,14 @@ from typing import TYPE_CHECKING
 from sqlalchemy import JSON, Boolean, Date, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.db.base import Base, TimestampMixin
+from app.db.base import Base, PublishableMixin, SoftDeleteMixin, TimestampMixin
+from app.models.tag import Tag, event_tag
 
 if TYPE_CHECKING:
     from app.models.talk import Talk
 
 
-class Event(Base, TimestampMixin):
+class Event(TimestampMixin, PublishableMixin, SoftDeleteMixin, Base):
     """A single speaking engagement (conference, meetup, workshop...)."""
 
     __tablename__ = "event"
@@ -45,6 +46,11 @@ class Event(Base, TimestampMixin):
 
     format: Mapped[str] = mapped_column(String(40), nullable=False, default="conference")
     language: Mapped[str] = mapped_column(String(10), nullable=False, default="en")
+    # Deprecated as the authoritative topic source (superseded by the `tags`
+    # relationship below) but kept, unread by new code paths where a `tags`
+    # value exists, purely so a one-time migration can normalize existing
+    # data into Tag rows without a risky hard cutover. See
+    # docs/event-management.md.
     topics: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
 
     event_url: Mapped[str | None] = mapped_column(String(255), nullable=True)
@@ -60,7 +66,11 @@ class Event(Base, TimestampMixin):
     # talks with especially notable session content.
     is_international_milestone: Mapped[bool] = mapped_column(Boolean, default=False)
 
+    # Admin-only — never serialized in any public schema.
+    internal_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+
     talk: Mapped[Talk | None] = relationship(back_populates="events")
+    tags: Mapped[list[Tag]] = relationship(secondary=event_tag, order_by="Tag.label")
 
     @property
     def has_coordinates(self) -> bool:

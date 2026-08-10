@@ -1,6 +1,10 @@
 from fastapi import APIRouter
 
 from app.api.v1 import (
+    admin_auth,
+    admin_events,
+    admin_projects,
+    admin_tags,
     biography,
     community,
     contact,
@@ -28,3 +32,7 @@ router.include_router(talks.router, tags=["talks"])
 router.include_router(passions.router, tags=["passions"])
 router.include_router(community.router, tags=["community"])
 router.include_router(contact.router, tags=["contact"])
+router.include_router(admin_auth.router, tags=["admin-auth"])
+router.include_router(admin_events.router, tags=["admin-events"])
+router.include_router(admin_projects.router, tags=["admin-projects"])
+router.include_router(admin_tags.router, tags=["admin-tags"])

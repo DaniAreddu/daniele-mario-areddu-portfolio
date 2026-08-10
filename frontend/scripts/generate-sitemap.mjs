@@ -58,6 +58,6 @@ console.log(`Wrote sitemap.xml with ${ROUTES.length * 2} URLs.`);
 // is rewritten here once the real site URL is known.
 writeFileSync(
   join(DIST, "robots.txt"),
-  `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`,
+  `User-agent: *\nAllow: /\nDisallow: /admin\n\nSitemap: ${SITE_URL}/sitemap.xml\n`,
   "utf-8",
 );

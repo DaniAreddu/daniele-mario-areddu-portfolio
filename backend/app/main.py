@@ -17,11 +17,19 @@ from app.db.session import dispose_engine
 logger = get_logger(__name__)
 
 
+_DEV_DEFAULT_TOTP_KEY = "fGh_Xp7R2VXN4o-pnC2FE6B7MFIPEhqTIsQGVfujB74="
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     configure_logging()
     logger.info("app_startup", environment=settings.environment)
+    if settings.is_production and settings.admin_totp_encryption_key == _DEV_DEFAULT_TOTP_KEY:
+        logger.error(
+            "insecure_default_totp_key_in_production",
+            hint="Set ADMIN_TOTP_ENCRYPTION_KEY to a freshly generated Fernet key.",
+        )
     yield
     await dispose_engine()
     logger.info("app_shutdown")
@@ -43,7 +51,7 @@ def create_app() -> FastAPI:
         CORSMiddleware,
         allow_origins=settings.cors_origins,
         allow_credentials=False,
-        allow_methods=["GET", "POST"],
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
         allow_headers=["*"],
     )
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.trusted_hosts)

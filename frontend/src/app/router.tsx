@@ -3,6 +3,11 @@ import { Route, Routes } from "react-router-dom";
 
 import { RootLayout } from "@/layouts/RootLayout";
 
+// The private webmaster area — not bilingual, not wrapped in the public
+// Nav/Footer chrome, and deliberately excluded from
+// scripts/generate-sitemap.mjs and scripts/prerender.mjs.
+const AdminApp = lazy(() => import("@/admin/AdminApp"));
+
 const HomePage = lazy(() => import("@/pages/HomePage"));
 const AboutPage = lazy(() => import("@/pages/AboutPage"));
 const JourneyPage = lazy(() => import("@/pages/JourneyPage"));
@@ -43,6 +48,7 @@ function renderRouteDefs() {
 export function AppRouter() {
   return (
     <Routes>
+      <Route path="admin/*" element={<AdminApp />} />
       <Route element={<RootLayout />}>
         {renderRouteDefs()}
         <Route path="it">{renderRouteDefs()}</Route>

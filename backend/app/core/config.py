@@ -61,6 +61,17 @@ class Settings(BaseSettings):
     default_locale: str = "en"
     supported_locales: Annotated[list[str], NoDecode] = ["en", "it"]
 
+    # Admin / CMS authentication
+    admin_session_cookie_name: str = "admin_session"
+    admin_session_ttl_hours: int = 12
+    admin_mfa_pending_ttl_minutes: int = 10
+    admin_login_rate_limit_per_hour: int = 10
+    admin_totp_rate_limit_per_10_minutes: int = 8
+    # Fernet key protecting TOTP secrets at rest. The default is a fixed,
+    # published dev-only key — generate a real one for any non-dev deployment:
+    #   python -c "from cryptography.fernet import Fernet as F; print(F.generate_key().decode())"
+    admin_totp_encryption_key: str = "fGh_Xp7R2VXN4o-pnC2FE6B7MFIPEhqTIsQGVfujB74="
+
     @field_validator("cors_origins", "trusted_hosts", "supported_locales", mode="before")
     @classmethod
     def _split_csv(cls, value: object) -> object:

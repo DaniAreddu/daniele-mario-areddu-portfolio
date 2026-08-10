@@ -1,21 +1,17 @@
 from __future__ import annotations
 
-import hashlib
 from datetime import timedelta
 
 from app.core.config import Settings
 from app.core.errors import RateLimitedError
 from app.core.logging import get_logger
+from app.core.security import sha256_hex
 from app.models.contact import ContactSubmission
 from app.repositories.contact_repository import ContactRepository
 from app.schemas.contact import ContactCreate, ContactResult
 from app.services.email_service import send_contact_email
 
 logger = get_logger(__name__)
-
-
-def _hash_ip(ip: str) -> str:
-    return hashlib.sha256(ip.encode("utf-8")).hexdigest()
 
 
 class ContactService:
@@ -30,7 +26,7 @@ class ContactService:
             logger.warning("contact_honeypot_triggered")
             return ContactResult(received=True, email_delivered=False)
 
-        ip_hash = _hash_ip(client_ip)
+        ip_hash = sha256_hex(client_ip)
         recent_count = await self.repository.count_recent_from_ip_hash(
             ip_hash, within=timedelta(hours=1)
         )

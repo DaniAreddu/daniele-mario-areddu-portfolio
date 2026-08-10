@@ -24,7 +24,21 @@ _HOME_COUNTRY = "Italy"
 _UPCOMING_STATUSES = {"upcoming", "incoming"}
 
 
-def _to_event_out(event: Event, locale: str) -> EventOut:
+def _event_topics(event: Event) -> list[str]:
+    """Tags are the authoritative, admin-managed source going forward; the
+    legacy JSON column is only a fallback for rows that somehow have no tag
+    rows yet (shouldn't happen post-migration, but costs nothing to guard).
+    """
+    if event.tags:
+        return sorted({tag.label for tag in event.tags})
+    return event.topics
+
+
+def to_event_out(event: Event, locale: str) -> EventOut:
+    """The public-facing mapping — also reused by the admin preview endpoint
+    so previewing a draft renders through the exact same shape the public
+    site will eventually use, rather than a second bespoke preview format.
+    """
     return EventOut(
         slug=event.slug,
         event_name=event.event_name,
@@ -47,7 +61,7 @@ def _to_event_out(event: Event, locale: str) -> EventOut:
         venue=event.venue,
         format=event.format,
         language=event.language,
-        topics=event.topics,
+        topics=_event_topics(event),
         event_url=event.event_url,
         slides_url=event.slides_url,
         recording_url=event.recording_url,
@@ -87,7 +101,9 @@ class EventService:
                 return False
             if continent is not None and (event.continent or "").lower() != continent.lower():
                 return False
-            if topic is not None and topic.lower() not in [t.lower() for t in event.topics]:
+            if topic is not None and topic.lower() not in [
+                t.lower() for t in _event_topics(event)
+            ]:
                 return False
             if format is not None and event.format.lower() != format.lower():
                 return False
@@ -108,7 +124,7 @@ class EventService:
                     return False
             return True
 
-        return [_to_event_out(event, locale) for event in events if matches(event)]
+        return [to_event_out(event, locale) for event in events if matches(event)]
 
     async def get_facets(self) -> EventFacetsOut:
         events = await self.repository.list_all()
@@ -116,7 +132,7 @@ class EventService:
             years=sorted({event.year for event in events}),
             countries=sorted({event.country for event in events if event.country}),
             continents=sorted({event.continent for event in events if event.continent}),
-            topics=sorted({topic for event in events for topic in event.topics}),
+            topics=sorted({topic for event in events for topic in _event_topics(event)}),
             event_names=sorted({event.event_name for event in events}),
             formats=sorted({event.format for event in events}),
         )
@@ -152,7 +168,7 @@ class EventService:
         event = await self.repository.get_by_slug(slug)
         if event is None:
             raise NotFoundError(f"Event '{slug}' was not found.")
-        return _to_event_out(event, locale)
+        return to_event_out(event, locale)
 
     async def get_geojson(self) -> GeoJsonFeatureCollection:
         events = await self.repository.list_with_coordinates()
@@ -171,7 +187,7 @@ class EventService:
                     "start_date": event.start_date.isoformat() if event.start_date else None,
                     "end_date": event.end_date.isoformat() if event.end_date else None,
                     "format": event.format,
-                    "topics": event.topics,
+                    "topics": _event_topics(event),
                     "status": event.status,
                     "is_featured": event.is_featured,
                     "is_international_milestone": event.is_international_milestone,
