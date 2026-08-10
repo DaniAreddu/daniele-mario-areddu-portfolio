@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-paper font-sans text-ink antialiased;
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      rgba(33, 31, 28, 0.05) 1px,
+      transparent 0
+    );
+    background-size: 22px 22px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-serif text-ink;
+  }
+
+  a {
+    @apply text-inherit;
+  }
+
+  ::selection {
+    @apply bg-cobalt text-paper;
+  }
+
+  :focus-visible {
+    outline: 2px solid #1e3fe0;
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100];
+    @apply focus:rounded-full focus:bg-ink focus:px-5 focus:py-3 focus:text-paper;
+  }
+
+  .container-editorial {
+    @apply mx-auto w-full max-w-editorial px-6 sm:px-8 lg:px-12;
+  }
+
+  .eyebrow {
+    @apply font-mono text-xs uppercase tracking-[0.2em] text-ink-faint;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-sm font-medium text-paper;
+    @apply transition-colors hover:bg-cobalt focus-visible:bg-cobalt;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 rounded-full border border-ink/20 bg-transparent px-6 py-3;
+    @apply text-sm font-medium text-ink transition-colors hover:border-ink;
+  }
+}

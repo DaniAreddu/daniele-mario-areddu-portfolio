@@ -1,0 +1,216 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "Chi sono",
+    "journey": "Percorso",
+    "projects": "Progetti",
+    "speaking": "Speaking",
+    "community": "Community",
+    "contact": "Contatti",
+    "inviteToSpeak": "Invitami a parlare",
+    "menu": "Menu",
+    "closeMenu": "Chiudi il menu",
+    "skipToContent": "Vai al contenuto"
+  },
+  "footer": {
+    "tagline": "Costruisco sistemi intelligenti. Condivido ciò che imparo in giro per il mondo.",
+    "rights": "Tutti i diritti riservati.",
+    "privacy": "Privacy",
+    "basedIn": "Con base in Italia — disponibile a livello internazionale"
+  },
+  "language": {
+    "label": "Lingua",
+    "en": "English",
+    "it": "Italiano"
+  },
+  "common": {
+    "loading": "Caricamento…",
+    "loadingError": "Non è stato possibile caricare questo contenuto. Riprova a breve.",
+    "retry": "Riprova",
+    "readMore": "Continua a leggere",
+    "viewProject": "Vedi il case study",
+    "backToProjects": "Torna ai progetti",
+    "backToSpeaking": "Torna allo speaking",
+    "present": "Oggi",
+    "exploreWork": "Esplora i miei lavori",
+    "inviteToSpeak": "Invitami a parlare",
+    "viewSpeakingMap": "Vedi la mappa degli interventi",
+    "followJourney": "Segui il mio percorso",
+    "letsCollaborate": "Collaboriamo",
+    "confidentialityNote": "Una nota sulla riservatezza",
+    "relatedSkills": "Competenze correlate",
+    "technologies": "Tecnologie",
+    "keyDecisions": "Decisioni chiave",
+    "lessonsLearned": "Lezioni apprese",
+    "outcome": "Risultato",
+    "approach": "Approccio",
+    "architecture": "Architettura",
+    "challenge": "La sfida",
+    "problem": "Il problema"
+  },
+  "home": {
+    "brandLabel": "Backend × AI × Community",
+    "basedIn": "Con base in Italia",
+    "availableFor": "Disponibile per speaking e collaborazioni internazionali",
+    "credibilityTalks": "~30 interventi tecnici",
+    "credibilityYears": "2 anni di speaking internazionale",
+    "credibilityRegions": "Europa, Nord America, Asia Centrale",
+    "sectionAbout": "Chi sono",
+    "sectionJourney": "Percorso",
+    "sectionSpeaking": "Speaking",
+    "sectionProjects": "Lavori selezionati",
+    "sectionCommunity": "Community",
+    "sectionPassions": "Oltre il lavoro",
+    "sectionContact": "Contattami",
+    "viewAllProjects": "Vedi tutti i progetti",
+    "viewAllTalks": "Vedi tutto lo storico degli interventi",
+    "viewFullBio": "Leggi la biografia completa",
+    "internationalSpeaker": {
+      "headline": "{{count}} interventi e partecipazioni in community",
+      "headline_other": "{{count}} interventi e partecipazioni in community"
+    }
+  },
+  "about": {
+    "title": "Chi sono",
+    "educationTitle": "Formazione",
+    "experienceTitle": "Esperienza",
+    "skillsTitle": "Competenze",
+    "speakerBioTitle": "Biografia da speaker",
+    "copyBio": "Copia la biografia",
+    "bioCopied": "Copiata negli appunti",
+    "speakerKitTitle": "Speaker kit",
+    "speakerKitUnavailable": "Uno speaker kit scaricabile (foto, CV e materiali per gli slide) è in preparazione e comparirà qui appena disponibile."
+  },
+  "journey": {
+    "title": "Percorso",
+    "intro": "Una timeline che collega formazione, lavoro ingegneristico, community building e speaking internazionale.",
+    "highlightOnMap": "Mostra sulla mappa degli interventi"
+  },
+  "experience": {
+    "title": "Esperienza"
+  },
+  "projects": {
+    "title": "Progetti",
+    "featured": "In evidenza",
+    "notFoundTitle": "Progetto non trovato",
+    "notFoundBody": "Questo case study non esiste o potrebbe essere stato spostato."
+  },
+  "speaking": {
+    "title": "Speaking",
+    "intro": "Un percorso internazionale da speaker dal 2023 al 2026 — conferenze, DevFest, meetup e user group tra Europa, Nord America e Asia Centrale.",
+    "mapTitle": "Mappa degli interventi",
+    "mapIntro": "Esplora dove Daniele ha parlato. Usa i filtri oppure passa alla vista elenco accessibile.",
+    "listViewToggle": "Vista elenco",
+    "mapViewToggle": "Vista mappa",
+    "filters": {
+      "year": "Anno",
+      "country": "Paese",
+      "continent": "Continente",
+      "topic": "Argomento",
+      "format": "Tipo",
+      "event": "Evento",
+      "search": "Cerca eventi",
+      "searchPlaceholder": "Cerca per evento, città o paese",
+      "allYears": "Tutti gli anni",
+      "allCountries": "Tutti i paesi",
+      "allContinents": "Tutti i continenti",
+      "allTopics": "Tutti gli argomenti",
+      "allFormats": "Tutti i tipi",
+      "clear": "Cancella filtri",
+      "resultsCount": "{{count}} evento",
+      "resultsCount_other": "{{count}} eventi"
+    },
+    "eventDetail": {
+      "close": "Chiudi",
+      "slides": "Slide",
+      "recording": "Registrazione",
+      "eventSite": "Sito dell'evento",
+      "sessions_one": "{{count}} sessione",
+      "sessions_other": "{{count}} sessioni",
+      "milestoneNote": "Tappa internazionale"
+    },
+    "featuredTalksTitle": "Interventi in evidenza",
+    "eventCatalogueTitle": "Catalogo eventi",
+    "mapFallbackTitle": "Mappa non disponibile",
+    "mapFallbackBody": "Non è stato possibile caricare la mappa interattiva. Ecco le stesse informazioni in un elenco accessibile.",
+    "mapLoading": "Caricamento della mappa interattiva…",
+    "sameLocation": {
+      "title": "Più interventi in questo luogo",
+      "body": "Più di un evento condivide questa posizione — scegline uno per vederne i dettagli."
+    },
+    "stats": {
+      "talks": "interventi e partecipazioni in community",
+      "cities": "città",
+      "countries": "paesi",
+      "continents": "continenti"
+    },
+    "upcoming": {
+      "title": "Prossime tappe",
+      "intro": "Interventi confermati o in via di conferma non ancora avvenuti.",
+      "upcoming": "In programma",
+      "incoming": "In arrivo"
+    },
+    "milestones": {
+      "title": "Tappe internazionali",
+      "intro": "Alcuni interventi che hanno segnato un vero passo verso un nuovo paese o una nuova regione."
+    },
+    "expansion": {
+      "title": "Dall'Italia al mondo",
+      "intro": "Lo stesso percorso, letto attraverso la geografia — un anno di città alla volta."
+    }
+  },
+  "community": {
+    "title": "Community",
+    "activitiesTitle": "Attività",
+    "collaborateTitle": "Collabora con Velletri.dev"
+  },
+  "passions": {
+    "title": "Oltre il lavoro"
+  },
+  "privacy": {
+    "title": "Privacy"
+  },
+  "notFound": {
+    "title": "Pagina non trovata",
+    "body": "La pagina che cerchi non esiste o è stata spostata.",
+    "cta": "Torna alla home"
+  },
+  "contact": {
+    "title": "Costruiamo, parliamo o collaboriamo.",
+    "intro": "Inviti a parlare, workshop, collaborazioni ingegneristiche e partnership con community sono tutti benvenuti.",
+    "emailLabel": "Oppure scrivi direttamente a",
+    "form": {
+      "name": "Nome",
+      "email": "Email",
+      "organization": "Organizzazione (opzionale)",
+      "requestType": "Tipo di richiesta",
+      "eventOrProject": "Evento o progetto (opzionale)",
+      "indicativeDate": "Data indicativa (opzionale)",
+      "message": "Messaggio",
+      "consent": "Acconsento che il mio messaggio sia utilizzato esclusivamente per rispondere a questa richiesta.",
+      "submit": "Invia messaggio",
+      "submitting": "Invio in corso…",
+      "requestTypes": {
+        "speaking_invitation": "Invito a parlare",
+        "workshop": "Workshop",
+        "engineering_collaboration": "Collaborazione ingegneristica",
+        "community_partnership": "Partnership con community",
+        "podcast_interview": "Podcast o intervista",
+        "other": "Altro"
+      },
+      "successTitle": "Messaggio inviato",
+      "successBody": "Grazie — Daniele ti risponderà il prima possibile.",
+      "successUndeliveredBody": "Il tuo messaggio è stato ricevuto, ma non è stato possibile consegnare la notifica email. Prova anche a scrivere direttamente via email.",
+      "errorTitle": "Qualcosa è andato storto",
+      "errorBody": "Controlla il modulo e riprova.",
+      "rateLimitedBody": "Troppi messaggi inviati di recente. Riprova più tardi.",
+      "validation": {
+        "required": "Questo campo è obbligatorio.",
+        "nameMin": "Inserisci almeno 2 caratteri.",
+        "emailInvalid": "Inserisci un indirizzo email valido.",
+        "messageMin": "Scrivi almeno 10 caratteri.",
+        "consentRequired": "Conferma per continuare."
+      }
+    }
+  }
+}

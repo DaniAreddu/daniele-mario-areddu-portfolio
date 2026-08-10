@@ -1,0 +1,216 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "journey": "Journey",
+    "projects": "Projects",
+    "speaking": "Speaking",
+    "community": "Community",
+    "contact": "Contact",
+    "inviteToSpeak": "Invite me to speak",
+    "menu": "Menu",
+    "closeMenu": "Close menu",
+    "skipToContent": "Skip to content"
+  },
+  "footer": {
+    "tagline": "Building intelligent systems. Sharing what I learn around the world.",
+    "rights": "All rights reserved.",
+    "privacy": "Privacy",
+    "basedIn": "Based in Italy — available worldwide"
+  },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "it": "Italiano"
+  },
+  "common": {
+    "loading": "Loading…",
+    "loadingError": "We couldn't load this content right now. Please try again shortly.",
+    "retry": "Retry",
+    "readMore": "Read more",
+    "viewProject": "View case study",
+    "backToProjects": "Back to projects",
+    "backToSpeaking": "Back to speaking",
+    "present": "Present",
+    "exploreWork": "Explore my work",
+    "inviteToSpeak": "Invite me to speak",
+    "viewSpeakingMap": "View speaking map",
+    "followJourney": "Follow my journey",
+    "letsCollaborate": "Let's collaborate",
+    "confidentialityNote": "A note on confidentiality",
+    "relatedSkills": "Related skills",
+    "technologies": "Technologies",
+    "keyDecisions": "Key decisions",
+    "lessonsLearned": "Lessons learned",
+    "outcome": "Outcome",
+    "approach": "Approach",
+    "architecture": "Architecture",
+    "challenge": "The challenge",
+    "problem": "The problem"
+  },
+  "home": {
+    "brandLabel": "Backend × AI × Communities",
+    "basedIn": "Based in Italy",
+    "availableFor": "Available for international speaking & collaboration",
+    "credibilityTalks": "~30 technical talks",
+    "credibilityYears": "2 years speaking internationally",
+    "credibilityRegions": "Europe, North America, Central Asia",
+    "sectionAbout": "About",
+    "sectionJourney": "Journey",
+    "sectionSpeaking": "Speaking",
+    "sectionProjects": "Selected work",
+    "sectionCommunity": "Community",
+    "sectionPassions": "Beyond the work",
+    "sectionContact": "Get in touch",
+    "viewAllProjects": "View all projects",
+    "viewAllTalks": "View the full speaking record",
+    "viewFullBio": "Read the full biography",
+    "internationalSpeaker": {
+      "headline": "{{count}} talks & community appearances",
+      "headline_other": "{{count}} talks & community appearances"
+    }
+  },
+  "about": {
+    "title": "About",
+    "educationTitle": "Education",
+    "experienceTitle": "Experience",
+    "skillsTitle": "Capabilities",
+    "speakerBioTitle": "Speaker biography",
+    "copyBio": "Copy speaker bio",
+    "bioCopied": "Copied to clipboard",
+    "speakerKitTitle": "Speaker kit",
+    "speakerKitUnavailable": "A downloadable speaker kit (headshot, CV, and slide assets) is in preparation and will appear here once available."
+  },
+  "journey": {
+    "title": "Journey",
+    "intro": "A timeline connecting education, engineering work, community building and international speaking.",
+    "highlightOnMap": "Show on speaking map"
+  },
+  "experience": {
+    "title": "Experience"
+  },
+  "projects": {
+    "title": "Projects",
+    "featured": "Featured",
+    "notFoundTitle": "Project not found",
+    "notFoundBody": "This case study doesn't exist or may have moved."
+  },
+  "speaking": {
+    "title": "Speaking",
+    "intro": "An international speaking journey from 2023 to 2026 — conferences, DevFests, meetups and user groups across Europe, North America and Central Asia.",
+    "mapTitle": "Speaking map",
+    "mapIntro": "Explore where Daniele has spoken. Use the filters or switch to the accessible list view.",
+    "listViewToggle": "List view",
+    "mapViewToggle": "Map view",
+    "filters": {
+      "year": "Year",
+      "country": "Country",
+      "continent": "Continent",
+      "topic": "Topic",
+      "format": "Type",
+      "event": "Event",
+      "search": "Search events",
+      "searchPlaceholder": "Search by event, city or country",
+      "allYears": "All years",
+      "allCountries": "All countries",
+      "allContinents": "All continents",
+      "allTopics": "All topics",
+      "allFormats": "All types",
+      "clear": "Clear filters",
+      "resultsCount": "{{count}} event",
+      "resultsCount_other": "{{count}} events"
+    },
+    "eventDetail": {
+      "close": "Close",
+      "slides": "Slides",
+      "recording": "Recording",
+      "eventSite": "Event website",
+      "sessions_one": "{{count}} session",
+      "sessions_other": "{{count}} sessions",
+      "milestoneNote": "International milestone"
+    },
+    "featuredTalksTitle": "Featured talks",
+    "eventCatalogueTitle": "Event catalogue",
+    "mapFallbackTitle": "Map unavailable",
+    "mapFallbackBody": "The interactive map couldn't load. Here is the same information as an accessible list.",
+    "mapLoading": "Loading the interactive map…",
+    "sameLocation": {
+      "title": "Multiple appearances here",
+      "body": "More than one event shares this location — choose one to see its details."
+    },
+    "stats": {
+      "talks": "talks & community appearances",
+      "cities": "cities",
+      "countries": "countries",
+      "continents": "continents"
+    },
+    "upcoming": {
+      "title": "Next stops",
+      "intro": "Confirmed and incoming appearances that haven't happened yet.",
+      "upcoming": "Upcoming",
+      "incoming": "Incoming"
+    },
+    "milestones": {
+      "title": "International milestones",
+      "intro": "A handful of appearances that marked a real step into a new country or region."
+    },
+    "expansion": {
+      "title": "From Italy to the world",
+      "intro": "The same journey, read through geography — one year of cities at a time."
+    }
+  },
+  "community": {
+    "title": "Community",
+    "activitiesTitle": "Activities",
+    "collaborateTitle": "Collaborate with Velletri.dev"
+  },
+  "passions": {
+    "title": "Beyond the work"
+  },
+  "privacy": {
+    "title": "Privacy"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "The page you're looking for doesn't exist or has moved.",
+    "cta": "Back to home"
+  },
+  "contact": {
+    "title": "Let's build, speak, or collaborate.",
+    "intro": "Speaking invitations, workshops, engineering collaborations and community partnerships are all welcome.",
+    "emailLabel": "Or write directly to",
+    "form": {
+      "name": "Name",
+      "email": "Email",
+      "organization": "Organization (optional)",
+      "requestType": "Request type",
+      "eventOrProject": "Event or project (optional)",
+      "indicativeDate": "Indicative date (optional)",
+      "message": "Message",
+      "consent": "I agree that my message will be used solely to respond to this enquiry.",
+      "submit": "Send message",
+      "submitting": "Sending…",
+      "requestTypes": {
+        "speaking_invitation": "Speaking invitation",
+        "workshop": "Workshop",
+        "engineering_collaboration": "Engineering collaboration",
+        "community_partnership": "Community partnership",
+        "podcast_interview": "Podcast or interview",
+        "other": "Other"
+      },
+      "successTitle": "Message sent",
+      "successBody": "Thank you — Daniele will get back to you as soon as possible.",
+      "successUndeliveredBody": "Your message was received, but the email notification could not be delivered. Please also try reaching out directly by email.",
+      "errorTitle": "Something went wrong",
+      "errorBody": "Please check the form and try again.",
+      "rateLimitedBody": "Too many messages sent recently. Please try again later.",
+      "validation": {
+        "required": "This field is required.",
+        "nameMin": "Please enter at least 2 characters.",
+        "emailInvalid": "Please enter a valid email address.",
+        "messageMin": "Please write at least 10 characters.",
+        "consentRequired": "Please confirm to continue."
+      }
+    }
+  }
+}

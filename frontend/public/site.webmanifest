@@ -1,0 +1,8 @@
+{
+  "name": "Daniele Mario Areddu — Backend & AI Developer",
+  "short_name": "D. M. Areddu",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }],
+  "theme_color": "#211F1C",
+  "background_color": "#F7F3EC",
+  "display": "standalone"
+}
